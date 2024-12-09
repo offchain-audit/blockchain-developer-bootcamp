@@ -2,11 +2,27 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
 describe("Token", ()=> {
-    it("has a name", async ()=> {
+    let token
+
+    beforeEach(async () => {
         const Token = await ethers.getContractFactory("Token")
-        let token = await Token.deploy()
-        const name = await token.name()
-        expect(name).to.equal("My Token")
+        token = await Token.deploy()
+    })
+
+    it("has correct name", async ()=> {
+        expect(await token.name()).to.equal("Socrates")
+    })
+
+    it("has correct symbol", async ()=> {
+        expect(await token.symbol()).to.equal("SOCR")
+    })
+
+    it("has correct decimals", async ()=> {
+        expect(await token.decimals()).to.equal("18")
+    })
+
+    it("has correct total supply", async ()=> {
+        const value = ethers.utils.parseUnits("1000000","ether")
+        expect(await token.totalSupply()).to.equal(value)
     })
 })
-
