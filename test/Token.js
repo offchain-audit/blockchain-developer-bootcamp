@@ -5,7 +5,7 @@ const tokens = (n) => {
     return ethers.utils.parseUnits(n.toString(),"ether")
 }
 describe("Token", ()=> {
-    let token, accounts, deployer
+    let token, accounts, deployer, receiver
 
     beforeEach(async () => {
         const Token = await ethers.getContractFactory("Token")
@@ -13,6 +13,7 @@ describe("Token", ()=> {
 
         accounts = await ethers.getSigners()
         deployer = accounts[0]
+        receiver = accounts[1]
     })
 
     describe("Deployment", () => {
@@ -20,7 +21,6 @@ describe("Token", ()=> {
         const symbol = "SOCR"
         const decimals = "18"
         const totalSupply = "1000000"
-
 
         it("Has correct name.", async ()=> {
             expect(await token.name()).to.equal(name)
@@ -41,5 +41,27 @@ describe("Token", ()=> {
         it("Assigns total supply to deployer.", async ()=> {
             expect(await token.balanceOf(deployer.address)).to.equal(tokens(totalSupply))
         })
-    }) 
+    })
+    
+    
+    describe("Sending Tokens", () => {
+        let amount, transaction, result
+
+        beforeEach(async () => {
+            amount = tokens(100)
+            transaction = await token.connect(deployer).transfer(receiver.address, amount)
+            result = transaction.wait()
+        })
+
+        it("Transfers token balances.", async () => {
+            // console.log("Deployer balance before transfer:", await token.balanceOf(deployer.address))
+            // console.log("Receiver balance before transfer:", await token.balanceOf(receiver.address))
+            //ensure tokens were transfered (balance change)
+            expect(await token.balanceOf(deployer.address)).to.equal(tokens(999900))
+            expect(await token.balanceOf(receiver.address)).to.equal(amount)
+            // console.log("Deployer balance after transfer:", await token.balanceOf(deployer.address))
+            // console.log("Receiver balance after transfer:", await token.balanceOf(receiver.address))          
+
+        })
+    })
 })
